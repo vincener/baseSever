@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.PermissionMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.Permission" id="permissionResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="parent_id" property="parentId" javaType="java.lang.String"/>
+        <result column="name" property="name" javaType="java.lang.String"/>
+        <result column="code" property="code" javaType="java.lang.String"/>
+        <result column="is_delete" property="isDelete" javaType="java.lang.Integer"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date"/>
+        <result column="update_date" property="updateDate" javaType="java.util.Date"/>
+        <result column="issuer" property="issuer" jdbcType="VARCHAR"/>
+        <result column="type" property="type" javaType="java.lang.String"/>
+    </resultMap>
+    
+    <resultMap type="com.hq.CloudPlatform.CA.entity.CaUserRolePermission" id="userRolePerResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="parentId" property="parentId" javaType="java.lang.String"/>
+        <result column="name" property="name" javaType="java.lang.String"/>
+        <result column="code" property="code" javaType="java.lang.String"/>
+    </resultMap>
+
+    <sql id="column">
+        t.id,t.parent_id,t.name,t.code,t.type,t.is_delete,t.create_date,t.update_date,t.issuer
+    </sql>
+
+	<select id="findByUserRolePer" resultMap="userRolePerResultMap">
+		SELECT distinct
+			  p.id as id,
+			  p.parent_id as parentId,
+			  p.name as name,
+			  p.code as code,
+			  p.order_num as order_num
+		FROM
+			  ca_user_role ur 
+		  INNER JOIN ca_role_permission rp 
+			    ON ur.role_id = rp.role_id 
+		  INNER JOIN ca_permission p 
+			    ON rp.permission_id = p.id 
+		WHERE p.type = 'menu' 
+		  AND ur.user_id = #{userId}
+		  and p.is_delete=0
+		  and (p.app=#{appCode} or p.id='0')
+	    ORDER BY order_num ASC
+	</select>
+
+
+    <select id="findByLoginName" resultMap="permissionResultMap">
+        select
+        <include refid="column"/>
+        from ca_user u
+        inner join ca_user_role ur on ur.user_id = u.id 
+        inner join ca_role_permission rp on ur.role_id = rp.role_id
+        inner join ca_permission t on rp.permission_id = t.id and t.is_delete=0
+        where u.login_name = #{loginName} and u.is_delete=0
+    </select>
+    
+    <select id="findByRoleId" resultMap="permissionResultMap">
+    	select
+        <include refid="column"/>
+        FROM ca_permission t    
+        INNER JOIN ca_role_permission rp
+        ON rp.permission_id=t.id
+		WHERE rp.role_id=#{id}
+		and t.is_delete=0
+    </select>
+
+    <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.Permission">
+        insert into ca_permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="code != null">
+                code,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="issuer != null">
+                issuer,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="parentId != null">
+                #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="issuer != null">
+                #{issuer,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    
+     <insert id="saveRolePermission" parameterType="com.hq.CloudPlatform.CA.entity.CaRolePermission">
+        insert into ca_role_permission
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="roleId != null">
+                role_id,
+            </if>
+            <if test="permissionId != null">
+                permission_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="issuer != null">
+                issuer,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="roleId != null">
+                #{roleId,jdbcType=VARCHAR},
+            </if>
+            <if test="permissionId != null">
+                #{permissionId,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="issuer != null">
+                #{issuer,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.Permission">
+        update ca_permission
+        <set>
+            <if test="parentId != null">
+                parent_id = #{parentId,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="updateDate != null">
+                update_date = #{updateDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="issuer != null">
+                issuer = #{issuer,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT} and is_delete=0
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        update ca_permission t set t.is_delete=1 where t.id = #{id}
+    </delete>
+
+    <delete id="batchDelete" parameterType="java.util.List">
+        update ca_permission t set t.is_delete=1 where t.id in
+        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+    
+	<delete id="deleteRolePermissionByRoleId" parameterType="java.lang.String">
+        delete from ca_role_permission where role_id = #{id}
+    </delete>
+    
+    <select id="findById" resultMap="permissionResultMap">
+        select
+        <include refid="column"/>
+        from ca_permission t where t.id = #{id} and t.is_delete=0
+    </select>
+
+    <select id="findAll" resultMap="permissionResultMap">
+        select
+        <include refid="column"/>
+        from ca_permission t where t.is_delete=0
+    </select>
+
+    <select id="findByMap" parameterType="java.util.Map" resultMap="permissionResultMap">
+        select
+        <include refid="column"/>
+        from ca_permission t
+        <include refid="sql_where"/>
+        ORDER BY order_num ASC
+    </select>
+
+    <select id="getCount" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_permission t
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="findByPage" parameterType="java.util.Map" resultMap="permissionResultMap">
+        SELECT
+        <include refid="column"/>
+        FROM ca_permission t
+        <include refid="sql_where"/>
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="">
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+
+    </select>
+
+    <!--查询条件-->
+    <sql id="sql_where">
+        <where>
+            <if test="name != null and name != ''">
+                <![CDATA[
+                and t.name like CONCAT('%',#{name},'%' )
+                ]]>
+            </if>
+            <if test="code != null and code != ''">
+                <![CDATA[
+                and t.code = #{code}
+            ]]>
+            </if>
+            <if test="type != null and type != ''">
+                <![CDATA[
+                and t.type = #{type} or t.id in (select distinct parent_id from ca_permission where type = #{type} and is_delete = 0)
+            ]]>
+            </if>
+             <![CDATA[
+                and t.is_delete = 0
+            ]]>
+        </where>
+    </sql>
+</mapper>

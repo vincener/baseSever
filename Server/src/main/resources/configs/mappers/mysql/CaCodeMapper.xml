@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.CaCodeMapper" >
+  <resultMap id="BaseResultMap" type="com.hq.CloudPlatform.CA.entity.CaCode" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="value" property="value" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="issuer" property="issuer" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+	<result column="is_delete" property="isDelete" jdbcType="INTEGER"/>  
+</resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+      <![CDATA[
+                and is_delete = 0
+                ]]>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, code, value, create_date, update_date, is_delete, issuer, type
+  </sql>
+
+  <sql id="sql_where">
+    <where>
+      <if test="value != null and value != ''">
+        <![CDATA[
+                and t.value = #{value}
+                ]]>
+      </if>
+      <if test="code != null and code != ''">
+        <![CDATA[
+                and t.code = #{code}
+            ]]>
+      </if>
+      <if test="issuer != null and issuer != ''">
+        <![CDATA[
+                and t.issuer like CONCAT('%',#{issuer},'%' )
+            ]]>
+      </if>
+        <![CDATA[
+                and t.is_delete = 0
+                ]]>
+    </where>
+  </sql>
+  <select id="findByMap" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from ca_code t
+    <include refid="sql_where"/>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from ca_code
+    where id = #{id,jdbcType=BIGINT} and is_delete=0
+  </select>
+  <delete id="deleteById" parameterType="java.lang.String" >
+    update ca_code set is_delete=1
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.CaCode" >
+    insert into ca_code
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="value != null" >
+        value,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="issuer != null" >
+        issuer,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null" >
+        #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+        #{issuer,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample"  resultType="java.lang.Integer" >
+    select count(*) from ca_code
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <select id="findAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from ca_code where is_delete=0
+  </select>
+  <select id="findById" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from ca_code
+    where id = #{id,jdbcType=BIGINT} and is_delete=0
+  </select>
+  <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.CaCode" >
+    update ca_code
+    <set>
+      <if test="code != null" >
+     code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="value != null" >
+      value = #{value,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+      update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+      issuer = #{issuer,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+      type = #{type,jdbcType=VARCHAR}
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT} and is_delete=0
+  </update>
+  <delete id="batchDelete" parameterType="java.util.List" >
+    update ca_code set is_delete=1 where id in
+    <foreach item="id" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>
+  </delete>
+  <select id="getCount" parameterType="java.util.Map" resultType="int">
+    select
+    count(1)
+    from ca_code t
+    <include refid="sql_where"/>
+  </select>
+  <select id="findByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+            SELECT
+            <include refid="Base_Column_List"/>
+            FROM ca_code t
+            <include refid="sql_where"/>
+            <choose>
+               <when test="orderFields != null and orderFields.size() > 0">
+                  order by
+                  <foreach collection="orderFields" index="idx"
+                      item="item" open="" separator="," close="" >
+                     <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                     <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                  </foreach>
+               </when>
+               <otherwise>
+                  ORDER BY t.create_date desc
+               </otherwise>
+            </choose>
+            LIMIT #{startRowNum},#{endRowNum}
+  </select>
+</mapper>

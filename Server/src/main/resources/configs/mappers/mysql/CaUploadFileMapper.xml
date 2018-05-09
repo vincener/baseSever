@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.UploadFileInfoMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.UploadFileInfo" id="uploadFileResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="file_key" property="key" javaType="java.lang.String"/>
+        <result column="file_path" property="filePath" javaType="java.lang.String"/>
+        <result column="content_type" property="contentType" javaType="java.lang.String"/>
+        <result column="file_size" property="size" javaType="java.lang.Long"/>
+    </resultMap>
+
+    <sql id="column">
+        t.id,t.file_key,t.file_path,t.content_type,t.file_size
+    </sql>
+
+    <select id="findByKey" resultMap="uploadFileResultMap">
+        select
+        <include refid="column"/>
+        from ca_upload_file t where t.file_key = #{key}
+        LIMIT 0,1
+    </select>
+
+    <delete id="deleteByKey" parameterType="java.lang.String">
+        delete from ca_upload_file where file_key = #{key}
+    </delete>
+
+    <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.UploadFileInfo">
+        insert into ca_upload_file(id,file_key,file_path,content_type,file_size)
+        values(#{id},#{key},#{filePath},#{contentType},#{size})
+    </insert>
+
+    <select id="findAll" resultMap="uploadFileResultMap">
+        select
+        <include refid="column"/>
+        from ca_upload_file t
+    </select>
+</mapper>

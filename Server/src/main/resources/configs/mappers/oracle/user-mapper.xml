@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.UserMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.User" id="userResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="login_name" property="loginName" javaType="java.lang.String"/>
+        <result column="password" property="password" javaType="java.lang.String"/>
+        <result column="username" property="username" javaType="java.lang.String"/>
+        <result column="job_num" property="jobNum" javaType="java.lang.String"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date"/>
+        <result column="update_date" property="updateDate" javaType="java.util.Date"/>
+        <result column="last_login_date" property="lastLoginDate" javaType="java.util.Date"/>
+        <result column="org_id" property="orgId" javaType="java.lang.String"/>
+        <result column="org_name" property="organization.name" javaType="java.lang.String"/>
+        <collection property="roleList" ofType="com.hq.CloudPlatform.CA.entity.Role" column="t.id">
+            <id column="role_id" property="id" />
+            <result column="role_name" property="name" />
+            <result column="role_code" property="code" />
+        </collection>
+    </resultMap>
+
+    <sql id="column">
+        t.id,t.org_id,t.login_name,t.password,t.username,t.job_num,t.create_date,t.update_date,t.last_login_date
+    </sql>
+
+    <select id="findById" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t where t.id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="userResultMap">
+        select
+        <include refid="column"/>,o.name as org_name,r.id as role_id, r.name as role_name, r.code as role_code
+        from ca_user t
+        inner join ca_user_role ur on t.id=ur.user_id
+        inner join ca_role r on ur.role_id=r.id
+        inner join ca_organization o on t.org_id=o.id
+    </select>
+
+    <select id="findByMap" parameterType="java.util.Map" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="getCount" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_user t
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="findByPage" parameterType="java.util.Map" resultMap="userResultMap">
+        <![CDATA[
+        SELECT * FROM
+        (
+          SELECT TEMP.*, ROWNUM RN
+          FROM (
+            SELECT
+            ]]><include refid="column"/><![CDATA[
+            FROM ca_user t
+            ]]><include refid="sql_where"/>
+            <choose>
+                <when test="orderBy != null and orderBy != ''">
+                    <![CDATA[order by #{orderBy}]]>
+                </when>
+                <otherwise>
+                    <![CDATA[ORDER BY t.create_date desc]]>
+                </otherwise>
+            </choose>
+            <![CDATA[
+          ) TEMP
+          WHERE ROWNUM <= #{endRowNum}
+        )
+        WHERE RN > #{startRowNum}
+        ]]>
+    </select>
+
+    <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.User">
+        update ca_user t
+        <set>
+            <if test="loginName != null and loginName != '' ">
+                <![CDATA[
+                    t.login_name = #{loginName},
+                ]]>
+            </if>
+            <if test="username != null and username != '' ">
+                <![CDATA[
+                    t.username = #{username},
+                ]]>
+            </if>
+            <if test="password != null and password != '' ">
+                <![CDATA[
+                    t.password = #{password},
+                ]]>
+            </if>
+            <if test="jobNum != null and jobNum != '' ">
+                <![CDATA[
+                    t.job_num = #{jobNum},
+                ]]>
+            </if>
+        </set>
+        where t.id=#{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        delete from ca_user t where t.id = #{id}
+    </delete>
+
+    <!--查询条件-->
+    <sql id="sql_where">
+        <where>
+            <if test="loginName != null and loginName != ''">
+                <![CDATA[
+                and t.login_name = #{loginName}
+                ]]>
+            </if>
+            <if test="username != null and username != ''">
+                <![CDATA[
+                and t.username = #{username}
+            ]]>
+            </if>
+            <if test="password != null and password != ''">
+                <![CDATA[
+                and t.password = #{password}
+            ]]>
+            </if>
+            <if test="jobNum != null and jobNum != ''">
+                <![CDATA[
+                and t.job_num = #{jobNum}
+                ]]>
+            </if>
+        </where>
+    </sql>
+    
+</mapper>

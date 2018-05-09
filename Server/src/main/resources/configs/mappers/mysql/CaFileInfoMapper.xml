@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.FileInfoMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.FileInfo" id="fileInfoResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="name" property="name" javaType="java.lang.String"/>
+        <result column="url" property="url" javaType="java.lang.String"/>
+        <association property="uploadFileInfo" javaType="com.hq.CloudPlatform.CA.entity.UploadFileInfo">
+            <id column="uf_id" property="id"/>
+            <result column="uf_file_key" property="key"/>
+            <result column="uf_file_path" property="filePath"/>
+            <result column="uf_content_type" property="contentType"/>
+            <result column="uf_file_size" property="size"/>
+        </association>
+    </resultMap>
+
+    <sql id="column">
+        t.id,
+        t.name,
+        t.upload_file_id,
+        t.url
+    </sql>
+
+    <sql id="uf_column">
+        t2.id as uf_id,
+        t2.file_key as uf_file_key,
+        t2.file_path as uf_file_path,
+        t2.content_type as uf_content_type,
+        t2.file_size as uf_file_size
+    </sql>
+
+    <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.FileInfo">
+        insert into ca_file_info(id,name,upload_file_id,url)
+        values(#{id},#{name},#{uploadFileInfo.id},#{url})
+    </insert>
+
+    <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.FileInfo">
+        update ca_file_info t
+        <set>
+            <if test="name != null and name != '' ">
+                <![CDATA[
+                    t.name = #{name},
+                ]]>
+            </if>
+            <if test="url != null and url != '' ">
+                <![CDATA[
+                    t.url = #{url},
+                ]]>
+            </if>
+            <if test="uploadFileInfo.id != null and uploadFileInfo.id != '' ">
+                <![CDATA[
+                    t.upload_file_id = #{uploadFileInfo.id},
+                ]]>
+            </if>
+        </set>
+        where t.id=#{id}
+    </update>
+
+    <select id="findById" resultMap="fileInfoResultMap">
+        select
+        <include refid="column"/>,
+        <include refid="uf_column"/>
+        from ca_file_info t
+        INNER JOIN ca_upload_file t2 ON t.upload_file_id = t2.id
+        where t.id = #{id}
+        LIMIT 0,1
+    </select>
+
+    <select id="findByMap" parameterType="java.util.Map" resultMap="fileInfoResultMap">
+        select
+        <include refid="column"/>,
+        <include refid="uf_column"/>
+        from ca_file_info t
+        INNER JOIN ca_upload_file t2 ON t.upload_file_id = t2.id
+        <include refid="sql_where"/>
+    </select>
+
+    <!--查询条件 -->
+    <sql id="sql_where">
+        <where>
+            <if test="name != null and name != ''">
+                <![CDATA[
+                and t.name = #{name}
+                ]]>
+            </if>
+            <if test="uploadFileId != null and uploadFileId != ''">
+                <![CDATA[
+                and t.upload_file_id = #{uploadFileId}
+            	]]>
+            </if>
+        </where>
+    </sql>
+
+</mapper>

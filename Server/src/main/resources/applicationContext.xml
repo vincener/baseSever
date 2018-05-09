@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 系统配置 -->
+    <context:property-placeholder location="classpath:config.properties" ignore-unresolvable="true"/>
+
+    <!-- service包 -->
+    <context:component-scan base-package="com.hq.CloudPlatform.CA.service"/>
+    <context:component-scan base-package="com.hq.CloudPlatform.CA.restful"/>
+    <context:component-scan base-package="com.hq.CloudPlatform.CA.sys"/>
+    <context:component-scan base-package="com.hq.CloudPlatform.CA.mapper.**"/>
+
+    <!-- 配置数据库连接池 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${connection.driver}"/>
+        <property name="url" value="${connection.url}"/>
+        <property name="username" value="${connection.username}"/>
+        <property name="password" value="${connection.password}"/>
+
+        <!-- 配置初始化大小、最小、最大 -->
+        <property name="initialSize" value="${druid.initialSize}"/>
+        <property name="minIdle" value="${druid.minIdle}"/>
+        <property name="maxActive" value="${druid.maxActive}"/>
+
+        <!-- 配置获取连接等待超时的时间 -->
+        <property name="maxWait" value="${druid.maxWait}"/>
+
+        <!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+        <property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetweenEvictionRunsMillis}"/>
+
+        <!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+        <property name="minEvictableIdleTimeMillis" value="${druid.minEvictableIdleTimeMillis}"/>
+
+        <!-- 验证连接有效与否的SQL，不同的数据配置不同 -->
+        <property name="validationQuery" value="${druid.validationQuery}"/>
+
+        <property name="testWhileIdle" value="${druid.testWhileIdle}"/>
+
+        <!-- 这里建议配置为TRUE，防止取到的连接不可用 -->
+        <property name="testOnBorrow" value="${druid.testOnBorrow}"/>
+        <property name="testOnReturn" value="${druid.testOnReturn}"/>
+
+        <!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+        <property name="poolPreparedStatements" value="${druid.poolPreparedStatements}"/>
+        <property name="maxPoolPreparedStatementPerConnectionSize"
+                  value="${druid.maxPoolPreparedStatementPerConnectionSize}"/>
+
+        <!-- 这里配置提交方式，默认就是TRUE，可以不用配置 -->
+        <property name="defaultAutoCommit" value="${druid.defaultAutoCommit}"/>
+
+        <!-- 配置监控统计拦截的filters -->
+        <property name="filters" value="${druid.filters}"/>
+    </bean>
+
+    <!-- 配置SqlSessionFactoryBean -->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath:configs/mappers/mysql/**/*.xml"/>
+        <property name="typeAliasesPackage" value="com.hq.CloudPlatform.CA.entity"/>
+    </bean>
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+        <property name="basePackage" value="com.hq.CloudPlatform.CA.mapper"/>
+    </bean>
+
+    <bean id="casRealm" class="com.hq.CloudPlatform.CA.service.realm.CasRealm">
+        <!-- 不使用Shiro自带的缓存方案, 缓存统一使用Spring Cache -->
+        <property name="authorizationCachingEnabled" value="false"/>
+    </bean>
+
+    <bean id="mybatisRealm" class="com.hq.CloudPlatform.CA.service.realm.MybatisRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="MD5"/>
+                <!-- true means hex encoded, false means base64 encoded -->
+                <property name="storedCredentialsHexEncoded" value="true"/>
+            </bean>
+        </property>
+        <property name="authorizationCachingEnabled" value="false"/>
+    </bean>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- Single realm app.  If you have multiple realms, use the 'realms' property instead. -->
+        <property name="realm" ref="mybatisRealm"/>
+    </bean>
+
+    <!-- Shiro 的Web过滤器-->
+    <bean id="ShiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="successUrl" value="/loginsuccess.html" />
+        <property name="loginUrl" value="/login.html"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /login.html = anon
+                /debug.html = anon
+                /restful/user/login = anon
+                /restful/user/devOrProduct = anon
+                /restful/user/generateCode = anon
+                /restful/fileDownload/download/** = anon
+                /restful/public/** = ipAuthc
+                /img/** = anon
+                /css/** = anon
+                /js/** = anon
+                /logout = logout
+                /** = user
+            </value>
+        </property>
+        <!--自定义拦截器-->
+        <property name="filters">
+            <map>
+                <entry key="ipAuthc" value-ref="ipFilter"/>
+                <entry key="casLoginFilter" value-ref="casLoginFilter"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="loginFilter" class="com.hq.CloudPlatform.CA.service.filter.LoginFilter"></bean>
+
+    <!-- 支持shiro注解 -->
+    <bean class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor"
+          p:securityManager-ref="securityManager"/>
+
+    <!-- 事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- 事务 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="save*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="update*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="batchUpdate*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="delete*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="logicDelete*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="batchDelete*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="logicBatchDelete*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="batchEnable*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="batchDisable*" propagation="REQUIRED" rollback-for="Throwable"/>
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- 事务入口 -->
+    <aop:config proxy-target-class="true" expose-proxy="true">
+        <aop:pointcut id="allServiceMethod" expression="execution(* com.hq.CloudPlatform.CA.service.*.*(..))"/>
+        <aop:advisor pointcut-ref="allServiceMethod" advice-ref="txAdvice"/>
+    </aop:config>
+
+    <!-- 支持注解方式声明式事务 -->
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+
+    <!-- 使用cglib进行动态代理 -->
+    <!-- proxy-target-class:为true表示基于类进行代理，否则只支持接口方式的代理 -->
+    <!-- expose-proxy: 开启暴露Aop代理到ThreadLocal支持,即可以通过AopContext.currentProxy()获取当前代理对象 -->
+    <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/>
+
+    <!--<import resource="spring-cache.xml"/>-->
+    <!--<import resource="redis-config.xml"/>-->
+</beans>

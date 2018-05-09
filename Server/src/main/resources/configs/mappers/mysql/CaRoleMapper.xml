@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.CaRoleMapper" >
+  <resultMap id="JoinResultMap" type="HashMap" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="issuer" property="issuer" jdbcType="VARCHAR" />
+    <result column="is_delete" property="isDelete" jdbcType="INTEGER" />
+  <!-- <result column="appcode" property="appcode" jdbcType="VARCHAR" />-->
+    <result column="orgId" property="orgId" jdbcType="INTEGER" />
+    <result column="orgName" property="caOrganization.name" jdbcType="VARCHAR" />
+<!-- 	<association  property="caOrganization" column="orgId"                        -->
+<!--             select="com.hq.CloudPlatform.CA.mapper.CaOrganizationMapper.findById" /> -->
+  </resultMap>
+  <resultMap id="BaseResultMap" type="com.hq.CloudPlatform.CA.entity.Role" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="issuer" property="issuer" jdbcType="VARCHAR" />
+    <result column="is_delete" property="isDelete" jdbcType="INTEGER" />
+   <!-- <result column="appcode" property="appcode" jdbcType="VARCHAR" />-->
+    <result column="orgId" property="orgId" jdbcType="INTEGER" />
+    <result column="orgName" property="caOrganization.name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    c.id, c.name, c.code, c.description, c.create_date, c.update_date, c.issuer, c.is_delete, /*c.appcode,*/c.orgId
+  </sql>
+  <sql id="sql_where">
+    <where>
+      <if test="name != null and name != ''">
+        <![CDATA[
+                and c.name like CONCAT('%',#{name},'%' )
+                ]]>
+      </if>
+      <if test="code != null and code != ''">
+        <![CDATA[
+                and c.code = #{code}
+            ]]>
+      </if>
+      <if test="issuer != null and issuer != ''">
+        <![CDATA[
+                and c.issuer like CONCAT('%',#{issuer},'%' )
+            ]]>
+      </if>
+     <!-- <if test="appcode != null and appcode != ''">
+        <![CDATA[
+                and c.appcode = #{appcode}
+                ]]>
+      </if>-->
+       <![CDATA[
+                and c.is_delete = 0
+                ]]>
+    </where>
+  </sql>
+  <!--验证查询条件 -->
+  <sql id="sql_where_1">
+    <where>
+      <if test="name != null and name != ''">
+        <![CDATA[
+                and c.name =#{name}
+                ]]>
+      </if>
+      <if test="code != null and code != ''">
+        <![CDATA[
+                and c.code = #{code}
+            ]]>
+      </if>
+      <if test="issuer != null and issuer != ''">
+        <![CDATA[
+                and c.issuer like CONCAT('%',#{issuer},'%' )
+            ]]>
+      </if>
+     <!-- <if test="appcode != null and appcode != ''">
+        <![CDATA[
+                and c.appcode = #{appcode}
+                ]]>
+      </if>-->
+      <![CDATA[
+                and c.is_delete = 0
+                ]]>
+    </where>
+  </sql>
+  <!--验证查询条件 -->
+  <sql id="sql_where_2">
+    <where>
+      <if test="name != null and name != ''">
+        <![CDATA[
+                and c.name =#{name}
+                ]]>
+      </if>
+      <if test="code != null and code != ''">
+        <![CDATA[
+                and c.code = #{code}
+            ]]>
+      </if>
+      <![CDATA[
+                and c.id != #{id}
+                ]]>
+      <![CDATA[
+                and c.is_delete = 0
+                ]]>
+    </where>
+  </sql>
+  <select id="findAll" resultMap="JoinResultMap" 	>
+    select
+    <include refid="Base_Column_List"/>, o.name orgName
+    from ca_role c inner join ca_organization o on c.orgId = o.id and o.is_delete=0
+    where c.is_delete=0
+  </select>
+  <select id="findAllJoinOrg" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>, o.name
+    from ca_role c inner join ca_organization o on c.orgId = o.id and o.is_delete=0
+    where c.is_delete=0
+  </select>
+  <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from ca_role c
+    where id = #{id,jdbcType=BIGINT} and c.is_delete=0
+  </select>
+  <delete id="deleteById" parameterType="java.lang.String" >
+    update ca_role set  is_delete = 1 
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+<!--   <delete id="deleteById" parameterType="java.lang.String" > -->
+<!--     delete from ca_role -->
+
+<!--     where id = #{id,jdbcType=BIGINT} -->
+<!--   </delete> -->
+  <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.Role" >
+    insert into ca_role
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="updateDate != null" >
+        update_date,
+      </if>
+      <if test="issuer != null" >
+        issuer,
+      </if>
+     <!-- <if test="appcode != null" >
+        appcode,
+      </if>-->
+       <if test="orgId != null" >
+        orgId,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+        #{issuer,jdbcType=VARCHAR},
+      </if>
+      <!--<if test="appcode != null" >
+        #{appcode,jdbcType=VARCHAR},
+      </if>-->
+      <if test="orgId != null" >
+        #{orgId},
+      </if>
+    </trim>
+  </insert>
+  <select id="getCount" parameterType="java.util.Map" resultType="int" >
+    select
+    count(1)
+    from ca_role c
+    <include refid="sql_where"/>
+  </select>
+  <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.Role" >
+    update ca_role
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null" >
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="updateDate != null" >
+        update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+        issuer = #{issuer,jdbcType=VARCHAR},
+      </if>
+      <!--<if test="appcode != null" >
+      appcode = #{appcode,jdbcType=VARCHAR},
+      </if>-->
+      <if test="orgId != null" >
+      orgId = #{orgId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT} and is_delete=0
+  </update>
+  <select id="findByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+            SELECT
+            <include refid="Base_Column_List"/>,o.name as orgName
+            FROM ca_role c
+            inner join ca_organization o on c.orgId = o.id
+    <include refid="sql_where"/>
+            <choose>
+                <when test="orderFields != null and orderFields.size() > 0">
+                  order by
+                  <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="" >
+                    <if test="item.field == 'id'">c.id ${item.sortType}</if>
+                    <if test="item.field == 'name'">CONVERT(c.name USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'description'">CONVERT(c.description USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'issuer'">CONVERT(c.issuer USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">c.update_date ${item.sortType}</if>
+                    <if test="item.field == 'orgName'">CONVERT(o.name USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">c.create_date ${item.sortType}</if>
+                  </foreach>
+                </when>
+                <otherwise>
+                    ORDER BY c.create_date desc
+                </otherwise>
+           </choose>
+            LIMIT #{startRowNum},#{pageSize}
+  </select>
+  <select id="findPageRoleByUserId" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM ca_role c
+    inner join ca_user_role ur on ur.role_id=c.id
+    where ur.user_id = #{id} and c.is_delete=0 and c.name like CONCAT('%',#{name},'%' )
+    <choose>
+      <when test="orderFields != null and orderFields.size() > 0">
+        order by
+        <foreach collection="orderFields" index="idx"
+                 item="item" open="" separator="," close="" >
+          <if test="item.field == 'name'">CONVERT(c.name USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+          <if test="item.field == 'description'">CONVERT(c.description USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+          <if test="item.field == 'issuer'">CONVERT(c.issuer USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+          <if test="item.field == 'updateDate'">c.update_date ${item.sortType}</if>
+          <if test="item.field == 'createDate'">c.create_date ${item.sortType}</if>
+        </foreach>
+      </when>
+      <otherwise>
+        ORDER BY c.create_date desc
+      </otherwise>
+    </choose>
+    LIMIT #{startRowNum},#{pageSize}
+  </select>
+  <select id="getCountByUserId" parameterType="java.util.Map" resultType="int" >
+    select
+    count(1)
+    from ca_role c
+    inner join ca_user_role ur on ur.role_id=c.id
+    where ur.user_id = #{id} and c.is_delete=0
+  </select>
+  <delete id="batchDelete" parameterType="java.util.List" >
+    update ca_role set is_delete=1 where id in
+    <foreach item="id" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>
+  </delete>
+  <select id="findByMap" parameterType="java.util.Map" resultMap="BaseResultMap">
+  select
+  <include refid="Base_Column_List"/>
+  from ca_role c
+  <include refid="sql_where_1"/>
+</select>
+  <select id="checkByMap" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from ca_role c
+    <include refid="sql_where_2"/>
+  </select>
+  <delete id="deleteUserRoleByUserId" parameterType="java.lang.String" >
+    delete from ca_user_role
+    where user_id = #{userId}
+  </delete>
+
+  <delete id="deleteUserRoleByRoleId" parameterType="java.lang.String" >
+    delete from ca_user_role
+    where role_id = #{roleId}
+  </delete>
+  <delete id="deleteUserRole" parameterType="java.lang.String" >
+    delete from ca_user_role
+    where user_id = #{userId,jdbcType=BIGINT} and role_id = #{roleId,jdbcType=BIGINT}
+  </delete>
+  <insert id="saveUserRole" parameterType="com.hq.CloudPlatform.CA.entity.CaUserRole">
+    insert into ca_user_role
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="roleId != null">
+        role_id,
+      </if>
+      <if test="createDate != null">
+        create_date,
+      </if>
+      <if test="issuer != null">
+        issuer,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="roleId != null">
+        #{roleId,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null">
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null">
+        #{issuer,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

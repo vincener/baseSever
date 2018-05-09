@@ -1,0 +1,472 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.hq.CloudPlatform</groupId>
+    <artifactId>BaseServer</artifactId>
+    <packaging>war</packaging>
+    <version>1.0</version>
+    <name>BaseServer Maven Webapp</name>
+    <url>http://maven.apache.org</url>
+
+<!--    <repositories>
+        <repository>
+            <id>Ztemap_Repository</id>
+            <name>Nexus_repos</name>
+            <url>http://192.168.1.210:8081/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>Ztemap_Repository</id>
+            <name>Nexus_repos</name>
+            <url>http://192.168.1.210:8081/nexus/content/groups/public/</url>
+        </pluginRepository>
+    </pluginRepositories>-->
+
+    <properties>
+        <lombok.version>1.16.10</lombok.version>
+        <slf4j.version>1.7.21</slf4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>4.2.8.RELEASE</spring.version>
+        <druid.version>1.0.18</druid.version>
+        <servlet.version>3.0.1</servlet.version>
+        <logback.version>1.0.13</logback.version>
+        <junit.version>4.12</junit.version>
+        <aspectj.version>1.7.4</aspectj.version>
+        <jersey.version>2.24</jersey.version>
+        <ojdbc6.version>11.2.0.4</ojdbc6.version>
+        <mysql.version>5.1.27</mysql.version>
+        <fastjson.version>1.2.24</fastjson.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <commons-beanutils.version>1.9.3</commons-beanutils.version>
+        <mybatis.version>3.2.8</mybatis.version>
+        <mybatis-spring.version>1.2.2</mybatis-spring.version>
+        <shiro.version>1.2.4</shiro.version>
+        <mongo-driver.version>3.4.2</mongo-driver.version>
+        <redis-clients.version>2.9.0</redis-clients.version>
+        <spring-redis-data.version>1.8.4.RELEASE</spring-redis-data.version>
+        <cas-client.version>3.3.3</cas-client.version>
+        <spring-data-mongodb.version>1.10.1.RELEASE</spring-data-mongodb.version>
+    </properties>
+
+    <dependencies>
+        <!--lombok 自动为实体类生成get set方法的JAR-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- **************日志相关 Start************** -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- java.util.logging 实际调用slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- log4j 实际调用slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>log4j-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <!-- **************日志相关 End************** -->
+
+        <!-- 测试相关的jar包 -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- **************Spring Start************** -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>${spring.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- **************Spring End************** -->
+
+        <!-- data source 相关jar包-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
+
+        <!-- aspectj相关jar包-->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+        </dependency>
+
+        <!-- Oracle jdbc驱动 -->
+        <!--<dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc6</artifactId>
+            <version>${ojdbc6.version}</version>
+        </dependency>-->
+
+        <!-- Mysql jdbc驱动 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish.jersey.ext</groupId>
+            <artifactId>jersey-spring3</artifactId>
+            <version>${jersey.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-web</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-beans</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>${commons-lang.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>${commons-beanutils.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>${mybatis.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>${mybatis-spring.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-core</artifactId>
+            <version>${shiro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>${shiro.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>${mongo-driver.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${redis-clients.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>${spring-redis-data.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-mongodb</artifactId>
+            <version>${spring-data-mongodb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jasig.cas.client</groupId>
+            <artifactId>cas-client-core</artifactId>
+            <version>${cas-client.version}</version>
+        </dependency>
+
+        <!-- 文件上传 -->
+        <dependency>
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <!--         <dependency>   -->
+        <!--             <groupId>workflow</groupId>   -->
+        <!--             <artifactId>com.hp.CloudPlotfrom.Workflow</artifactId>   -->
+        <!--            <version>0.0.1-SNAPSHOT</version>       -->
+        <!--             <type>war</type>   -->
+        <!--     </dependency> -->
+
+   <!--     <dependency>
+            <groupId>com.baidu.web</groupId>
+            <artifactId>ueditor</artifactId>
+            <version>1.1.2</version>
+        </dependency>-->
+    </dependencies>
+
+    <build>
+        <finalName>BaseServer</finalName>
+
+        <plugins>
+            <!-- Jetty插件，支持maven启动jetty来做为Web项目的容器 -->
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>9.3.13.v20161014</version>
+                <configuration>
+                    <contextXml>src/test/resources/jetty-contexts.xml</contextXml>
+                    <webAppConfig>
+                        <contextPath>/BaseServer</contextPath>
+                    </webAppConfig>
+                    <httpConnector>
+                        <port>9080</port>
+                    </httpConnector>
+                    <scanIntervalSeconds>3</scanIntervalSeconds>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>spring.profiles.active</name>
+                            <value>development</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+
+                    <!-- java.util.logging 实际调用slf4j -->
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jul-to-slf4j</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+
+                    <!-- log4j 实际调用slf4j -->
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-over-slf4j</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>jcl-over-slf4j</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+
+                    <!-- logback -->
+                    <dependency>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                        <version>${logback.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- 编辑时将lombok的注解编释成实际的代码，即自己添加get set方法 -->
+            <plugin>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok-maven-plugin</artifactId>
+                <version>1.16.10.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>delombok</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <!-- 根据profile编译项目生产对应的配置文件 ${xxx}替换 } -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- 开发环境 -->
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <profile.id>development</profile.id>
+                <!--
+                <connection.driver_class>com.mysql.jdbc.Driver</connection.driver_class>
+                <connection.url><![CDATA[jdbc:mysql://127.0.0.1:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></connection.url>
+                <connection.username>root</connection.username>
+                <connection.password>root</connection.password>
+                -->
+
+                <db.driver_class>com.mysql.jdbc.Driver</db.driver_class>
+                <db.url><![CDATA[jdbc:mysql://127.0.0.1:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></db.url>
+                <db.username>root</db.username>
+                <db.password>ztemap.abcd</db.password>
+
+                <log.dir>${project.basedir}/logs</log.dir>
+            </properties>
+        </profile>
+
+        <profile>
+            <!-- 集成测试环境 -->
+            <id>it</id>
+            <properties>
+                <profile.id>it</profile.id>
+                <!--
+                <connection.driver_class>com.mysql.jdbc.Driver</connection.driver_class>
+                <connection.url><![CDATA[jdbc:mysql://127.0.0.1:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></connection.url>
+                <connection.username>root</connection.username>
+                <connection.password>root</connection.password>
+                -->
+
+                <db.driver_class>com.mysql.jdbc.Driver</db.driver_class>
+                <db.url><![CDATA[jdbc:mysql://192.168.1.210:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></db.url>
+                <db.username>huiqing</db.username>
+                <db.password>huiqing</db.password>
+
+                <log.dir>${project.basedir}/logs</log.dir>
+            </properties>
+        </profile>
+
+        <profile>
+            <!-- 正式生产环境 -->
+            <id>production</id>
+            <properties>
+                <profile.id>production</profile.id>
+                <!--
+                <connection.driver_class>com.mysql.jdbc.Driver</connection.driver_class>
+                <connection.url><![CDATA[jdbc:mysql://127.0.0.1:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></connection.url>
+                <connection.username>root</connection.username>
+                <connection.password>root</connection.password>
+                -->
+
+                <db.driver_class>com.mysql.jdbc.Driver</db.driver_class>
+                <db.url><![CDATA[jdbc:mysql://192.168.1.210:3306/baseserver?useUnicode=true&characterEncoding=UTF-8]]></db.url>
+                <db.username>huiqing</db.username>
+                <db.password>huiqing</db.password>
+
+                <log.dir>${project.basedir}/logs</log.dir>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

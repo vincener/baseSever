@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.PermissionMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.Permission" id="permissionResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="parent_id" property="parentId" javaType="java.lang.String"/>
+        <result column="name" property="name" javaType="java.lang.String"/>
+        <result column="code" property="code" javaType="java.lang.String"/>
+        <result column="type" property="type" javaType="java.lang.String"/>
+    </resultMap>
+
+    <sql id="column">
+        t.id,t.parent_id,t.name,t.code,t.type
+    </sql>
+
+    <select id="findByLoginName" resultMap="permissionResultMap">
+        select
+        <include refid="column"/>
+        from ca_user u
+        inner join ca_user_role ur on ur.user_id = u.id
+        inner join ca_role_permission rp on ur.role_id = rp.role_id
+        inner join ca_permission t on rp.permission_id = t.id
+        where u.login_name = #{loginName}
+    </select>
+
+</mapper>

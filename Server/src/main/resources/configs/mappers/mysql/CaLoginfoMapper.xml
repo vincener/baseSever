@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.CaLoginfoMapper" >
+  <resultMap id="BaseResultMap" type="com.hq.CloudPlatform.CA.entity.CaLoginfo" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="Login_ip" property="loginIp" jdbcType="VARCHAR" />
+    <result column="Create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="Update_date" property="updateDate" jdbcType="TIMESTAMP" />
+    <result column="issuer" property="issuer" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, user_id, type, Login_ip, Create_date, Update_date, issuer
+  </sql>
+  <sql id="sql_where">
+    <where>
+      <if test="userId != null and userId != ''">
+        <![CDATA[
+                and t.user_id =#{userId}
+                ]]>
+      </if>
+      <if test="type != null and type != ''">
+        <![CDATA[
+                and t.type = #{type}
+            ]]>
+      </if>
+      <if test="issuer != null and issuer != ''">
+        <![CDATA[
+                and t.issuer like CONCAT('%',#{issuer},'%' )
+            ]]>
+      </if>
+      <if test="createDate != null and createDate != ''">
+        <![CDATA[
+                and t.Create_date = #{createDate}
+                ]]>
+      </if>
+    </where>
+  </sql>
+
+  <select id="findById" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from ca_loginfo
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="findAll" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select
+    <include refid="Base_Column_List" />
+    from ca_loginfo
+  </select>
+  <delete id="deleteById" parameterType="java.lang.String" >
+    delete from ca_loginfo
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.CaLoginfo" >
+    insert into ca_loginfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="loginIp != null" >
+        Login_ip,
+      </if>
+      <if test="createDate != null" >
+        Create_date,
+      </if>
+      <if test="updateDate != null" >
+        Update_date,
+      </if>
+      <if test="issuer != null" >
+        issuer,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="loginIp != null" >
+        #{loginIp,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+        #{issuer,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" resultType="java.lang.Integer" >
+    select count(*) from ca_loginfo
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.CaLoginfo" >
+    update ca_loginfo
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=VARCHAR},
+      </if>
+      <if test="loginIp != null" >
+        Login_ip = #{loginIp,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        Create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateDate != null" >
+        Update_date = #{updateDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="issuer != null" >
+        issuer = #{issuer,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <delete id="batchDelete" parameterType="java.util.List" >
+    delete from ca_loginfo where id in
+    <foreach item="id" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>
+  </delete>
+  <select id="findByMap" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from ca_loginfo t
+    <include refid="sql_where"/>
+  </select>
+  <select id="findByPage" parameterType="java.util.Map" resultMap="BaseResultMap">
+            SELECT
+            <include refid="Base_Column_List"/>
+            FROM ca_loginfo t
+            <include refid="sql_where"/>
+           <choose>
+               <when test="orderFields != null and orderFields.size() > 0">
+                   order by
+                   <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="" >
+                       <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                       <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                   </foreach>
+               </when>
+               <otherwise>
+                   ORDER BY t.create_date desc
+               </otherwise>
+           </choose>
+            LIMIT #{startRowNum},#{endRowNum}
+  </select>
+  <select id="getCount" parameterType="java.util.Map" resultType="int">
+    select
+    count(1)
+    from ca_loginfo t
+    <include refid="sql_where"/>
+  </select>
+</mapper>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页面</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+<h1>登录页面</h1>
+<div class="login-base">
+    <div class="login-top"><div class="login-header"></div></div>
+    <div class="login-mid">
+        <div class="login-mian">
+            <form class="form" style="padding-top: 0px;">
+                <div class="fl">
+                    <div>
+                        <label for="" style="letter-spacing: 0.7px;">用户名：</label>
+                        <input type="text" class="loginName" placeholder="请输入用户名" name="username" />
+                    </div>
+                    <div>
+                        <label for="">密&nbsp;&nbsp;&nbsp;&nbsp;码：</label>
+                        <input type="password" class="loginPsw" placeholder="请输入密码" name="password"/>
+                    </div>
+                    <div>
+                        <label style="letter-spacing: 0.7px;">验证码：</label>
+                        <input id="identifyCode" type="text" style="width: 85px;" class="loginName" placeholder="输入验证码"/>
+                        <img id="code" src="./restful/user/generateCode"
+                             style="position: absolute;margin-left:3px;cursor: pointer;border:1px solid #5cadff;">
+                    </div>
+                    <p class="errorMsg" style="width: 300px"></p>
+                </div>
+                <div class="fr" style="margin-top:15px;"><button class="loginBtn">登录</button></div>
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    var CpUser = {};
+
+    CpUser.login = function () {
+        var _username = $(".loginName").val().replace(/\s/g, '');
+        var _pwd = $(".loginPsw").val().replace(/\s/g, '');
+        var _identifyCode = $("#identifyCode").val().replace(/\s/g, '');
+
+        CpUser.userName = _username;
+        CpUser.password = _pwd;
+        CpUser.identifyCode = _identifyCode;
+
+        if (CpUser.loginValidate()) {
+            var params = {};
+            params.loginName = CpUser.userName.replace(/\s/g, '');
+            params.password = CpUser.password.replace(/\s/g, '');
+            params.identifyCode = CpUser.identifyCode.replace(/\s/g, '');
+
+            $.ajax({
+                type: "post",
+                url: "./restful/user/login",
+                contentType: 'application/json',
+                dataType: "json",
+                //	data:params,
+                data: JSON.stringify(params),
+                success: function (data) {
+                    if ("success" == data.status) {
+                        debugger;
+                        if(data.content.url==""){
+                            window.location.href="index.html";
+                        }
+                        else {
+                            window.location.href=data.content.url;
+                        }
+
+                    } else if ("fail" == data.status) {
+                        $(".errorMsg").text(data.message);
+                    }
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        }
+        return false;
+    };
+
+    CpUser.loginValidate = function () {
+        if (this.userName == "" || this.password == "" || this.identifyCode == "") {
+            $(".loginName").focus();
+            $(".errorMsg").text("登陆表单填写不完整");
+            return false;
+        }
+
+        return true;
+    };
+
+    /*登陆时监测enter按键实现Tab按键效果*/
+    function enterKey() {
+        if (event.keyCode == 13) {
+            if ("" == $(".loginName").val()) {
+                $(".loginName").focus()
+            } else {
+                if ("" == $(".loginPsw").val()) {
+                    $(".loginPsw").focus()
+                } else {
+                    if ("" == $("#identifyCode").val()){
+                        $("#identifyCode").focus();
+                    }else {
+                        $(".loginBtn").click();
+                    }
+                }
+            }
+        }
+    }
+
+    function checkUser(username) {  //用户名验证
+
+        $(".loginName").focus(function () {
+            $(this).val("");
+            $(".errorMsg").text("");
+        });
+        $(".loginName").blur(function () {
+            var _username = $(".loginName").val();
+            var reg = /^[a-zA-Z]+[a-zA-Z0-9]+$/;  //用户名只能由英文字母或数字组成(不支持中文、不能以数字开头)
+            if (_username == "") {
+                $(".errorMsg").text("请输入用户名");
+            } else if (!reg.test(_username)) {
+                $(".errorMsg").text("您输入的用户名格式不正确");
+            }
+            return false;
+        });
+    };
+
+    function checkidentifyCode() {  //验证码验证
+
+        $("#identifyCode").focus(function () {
+            $(this).val("");
+            $(".errorMsg").text("");
+        });
+        $("#identifyCode").blur(function () {
+            var _identifyCode = $("#identifyCode").val();
+            var reg = /^[a-zA-Z0-9]+[a-zA-Z0-9]+$/;  //验证码只能由英文字母或数字组成
+            if (_identifyCode == "") {
+                $(".errorMsg").text("请输入验证码");
+            } else if (!reg.test(_identifyCode)) {
+                $(".errorMsg").text("您输入的验证码格式不正确");
+            }
+            return false;
+        });
+    };
+
+    function checkPsw() {           //密码验证
+        $(".loginPsw").focus(function () {
+            $(this).val("");
+        });
+        $(".loginPsw").blur(function () {
+            var _pwd = $(".loginPsw").val();
+            var reg = /^[0-9a-zA-Z]{6,20}$/;  //长度在6-20之间，由字母和数字组成
+            if (_pwd == "") {
+                $(".errorMsg").text("请输入密码");
+            } else if (!reg.test(_pwd)) {
+                $(".errorMsg").text("您输入的密码格式不正确");
+
+            }else{
+                $(".errorMsg").text("");
+            }
+            return false;
+        });
+
+    }
+
+    $(function () {
+
+        checkUser();
+        checkPsw();
+        checkidentifyCode();
+
+        $(".loginBtn").on("click", CpUser.login);
+
+        $(".form").keydown(function () {
+            enterKey();
+        });
+
+        $("#code").click(function () {
+            var img = $("#code").get(0);
+            img.src = img.src + "?";
+        });
+    })
+
+</script>

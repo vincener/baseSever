@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hq.CloudPlatform.CA.mapper.UserMapper">
+
+    <resultMap type="com.hq.CloudPlatform.CA.entity.User" id="userResultMap">
+        <result column="id" property="id" javaType="java.lang.String"/>
+        <result column="org_id" property="orgId" javaType="java.lang.String"/>
+        <result column="login_name" property="loginName" javaType="java.lang.String"/>
+        <result column="password" property="password" javaType="java.lang.String"/>
+        <result column="username" property="username" javaType="java.lang.String"/>
+        <result column="job_num" property="jobNum" javaType="java.lang.String"/>
+        <result column="last_login_date" property="lastLoginDate" javaType="java.util.Date"/>
+        <result column="create_date" property="createDate" javaType="java.util.Date"/>
+        <result column="update_date" property="updateDate" javaType="java.util.Date"/>
+        <result column="login_ip" property="loginIp" javaType="java.lang.String"/>
+        <result column="is_lock" property="isLock" javaType="java.lang.Integer"/>
+        <result column="lockdate" property="loceDate" javaType="java.util.Date"/>
+        <result column="trycount" property="tryCount" javaType="java.lang.Integer"/>
+        <result column="phone" property="phone" javaType="java.lang.String"/>
+        <result column="email" property="email" javaType="java.lang.String"/>
+        <result column="direct_manager_id" property="directManagerId" javaType="java.lang.String"/>
+        <result column="direct_manager_name" property="directManagerName" javaType="java.lang.String"/>
+        <result column="org_name" property="organization.name" javaType="java.lang.String"/>
+        <result column="org_manager_is_lock" property="caOrgManager.isLock" javaType="java.lang.Integer"/>
+        <collection property="roleList" ofType="com.hq.CloudPlatform.CA.entity.Role">
+            <id column="role_id" property="id" />
+            <result column="role_name" property="name" />
+            <result column="role_code" property="code" />
+            <result column="description" property="description" />
+            <result column="issuer" property="issuer" />
+        </collection>
+    </resultMap>
+
+    <sql id="column">
+        t.id,t.org_id,t.login_name,t.password,t.username,t.job_num,t.last_login_date,t.create_date,t.update_date,t.login_ip,t.is_lock,t.lockdate,t.trycount,t.phone,t.email,t.direct_manager_id,t.direct_manager_name
+    </sql>
+
+    <!-- 只查看本机构关联人员的信息 -->
+    <select id="findUserByCurrentOrgId" parameterType="Long" resultMap="userResultMap">
+        select
+        <include refid="column"/>,o.name org_name
+        from ca_user t
+          left join ca_organization o on t.org_id=o.id
+        <include refid="sql_where"/> and t.org_id=#{id}
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="">
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'username'">CONVERT(t.username USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'loginName'">t.login_name ${item.sortType}</if>
+                    <if test="item.field == 'lastLoginDate'">t.last_login_date ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                    <if test="item.field == 'phone'">t.phone ${item.sortType}</if>
+                    <if test="item.field == 'jobNum'">t.job_num ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">t.update_date ${item.sortType}</if>
+                    <if test="item.field == 'loginIp'">t.login_ip ${item.sortType}</if>
+                    <if test="item.field == 'email'">t.email ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+    </select>
+
+    <select id="findUserByCurrentOrgIdCount" parameterType="java.util.Map" resultType="int">
+        select
+        count(*)
+        from ca_user t
+        <include refid="sql_where"/>
+        and t.org_id=#{id}
+    </select>
+
+    <!-- 修改密码时，验证原密码是否正确 -->
+    <select id="checkPassword" resultType="int">
+        select count(*) from ca_user where login_name=#{loginName} and password=#{password}
+    </select>
+
+
+    <!-- 删除机构时查看该机构下是否还有成员 -->
+    <select id="findExistUserByOrgId" parameterType="String" resultType="int">
+        select count(*) from ca_user where org_id=#{orgId}
+    </select>
+
+	<!-- 根据当前机构id查询该机构所有子机构，关联的人员信息 -->
+    <select id="findUserByOrgId" parameterType="java.util.Map" resultMap="userResultMap">
+        select
+        <include refid="column"/>, o.name as org_name
+        from ca_user t
+          left join ca_organization o on t.org_id=o.id
+        <include refid="sql_where"/>
+        AND t.org_id in (SELECT id FROM ca_organization WHERE FIND_IN_SET(id,Fgetchildlist(#{id})))
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="" >
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'username'">CONVERT(t.username USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'loginName'">t.login_name ${item.sortType}</if>
+                    <if test="item.field == 'lastLoginDate'">t.last_login_date ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                    <if test="item.field == 'phone'">t.phone ${item.sortType}</if>
+                    <if test="item.field == 'jobNum'">t.job_num ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">t.update_date ${item.sortType}</if>
+                    <if test="item.field == 'loginIp'">t.login_ip ${item.sortType}</if>
+                    <if test="item.field == 'email'">t.email ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+    </select>
+	
+	<select id="findUserByOrgIdCount" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_user t
+        <include refid="sql_where"/>
+        AND t.org_id in (SELECT id FROM ca_organization WHERE FIND_IN_SET(id,getchildlist(#{id})))	
+    </select>
+
+
+    <insert id="save" parameterType="com.hq.CloudPlatform.CA.entity.User">
+        insert into ca_user
+        (org_id, username, login_name, password, job_num, create_date, update_date, last_login_date,issuer,phone,email,login_ip,direct_manager_id,direct_manager_name)
+        values
+        (#{orgId}, #{username}, #{loginName}, #{password}, #{jobNum}, #{createDate}, #{updateDate}, #{lastLoginDate},#{issuer},#{phone},#{email},#{loginIp},#{directManagerId},#{directManagerName})
+    </insert>
+
+    <update id="update" parameterType="com.hq.CloudPlatform.CA.entity.User">
+        update ca_user t
+        <set>
+            <if test="loginName != null and loginName != '' ">
+                <![CDATA[
+                    t.login_name = #{loginName},
+                ]]>
+            </if><if test="loginIp != null and loginIp != '' ">
+                <![CDATA[
+                    t.login_ip = #{loginIp},
+                ]]>
+            </if>
+            <if test="username != null and username != '' ">
+                <![CDATA[
+                    t.username = #{username},
+                ]]>
+            </if>
+            <if test="password != null and password != '' ">
+                <![CDATA[
+                    t.password = #{password},
+                ]]>
+            </if>
+            <if test="jobNum != null and jobNum != '' ">
+                <![CDATA[
+                    t.job_num = #{jobNum},
+                ]]>
+            </if>
+            <if test="issuer != null and issuer != '' ">
+                <![CDATA[
+                    t.issuer = #{issuer},
+                ]]>
+            </if>
+            <if test="updateDate != null and updateDate != '' ">
+	            <![CDATA[
+	                    t.update_date = #{updateDate},
+	                ]]>
+            </if>
+            <if test="lastLoginDate != null and lastLoginDate != '' ">
+	            <![CDATA[
+	                    t.last_login_date = #{lastLoginDate},
+	                ]]>
+            </if>
+            <if test="phone != null and phone != '' ">
+	            <![CDATA[
+	                    t.phone = #{phone},
+	                ]]>
+            </if>
+             <if test="email != null and email != '' ">
+	            <![CDATA[
+	                    t.email = #{email},
+	                ]]>
+            </if>
+            <if test="orgId != null and orgId != '' ">
+                <![CDATA[
+	                    t.org_id = #{orgId},
+	                ]]>
+            </if>
+            <if test="directManagerId != null and directManagerId != '' ">
+                <![CDATA[
+	                    t.direct_manager_id = #{directManagerId},
+	                ]]>
+            </if>
+            <if test="directManagerName != null and directManagerName != '' ">
+                <![CDATA[
+	                    t.direct_manager_name = #{directManagerName},
+	                ]]>
+            </if>
+        </set>
+        where t.id=#{id} and is_delete=0
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.String">
+        update ca_user t set t.is_delete=1 where t.id = #{id}
+    </delete>
+    <delete id="deleteByIdByLogic" parameterType="java.lang.String">
+        update ca_user t set t.is_delete=1 where t.id = #{id}
+    </delete>
+
+    <delete id="batchDelete" parameterType="java.util.List">
+        update ca_user t set t.is_delete=1 where t.id in
+        <foreach item="id" index="index" collection="list" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+    <select id="findById" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t where t.id = #{id} and t.is_delete=0
+    </select>
+    <!-- 根据登陆账号查询用户信息 -->
+    <select id="findByLongName" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t where t.login_name = #{loginName} and t.is_delete=0
+    </select>
+
+    <select id="findAll" resultMap="userResultMap">
+        select
+        <include refid="column"/>,o.name as org_name,r.id as role_id, r.name as role_name, r.code as role_code
+        from ca_user t
+        inner join ca_user_role ur on t.id=ur.user_id
+        inner join ca_role r on ur.role_id=r.id
+        inner join ca_organization o on t.org_id=o.id
+        where t.is_delete=0
+    </select>
+
+    <select id="findAllUser" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t where t.is_delete=0
+    </select>
+
+    <select id="findByMap" parameterType="java.util.Map" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t
+        <include refid="sql_where_1"/>
+    </select>
+
+    <select id="getCount" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_user t
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="findByPage" parameterType="java.util.Map" resultMap="userResultMap">
+        SELECT
+        <include refid="column"/>, o.name as org_name
+        FROM ca_user t
+          left join ca_organization o on t.org_id=o.id
+        <include refid="sql_where"/>
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="" >
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'username'">CONVERT(t.username USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'loginName'">t.login_name ${item.sortType}</if>
+                    <if test="item.field == 'lastLoginDate'">t.last_login_date ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                    <if test="item.field == 'phone'">t.phone ${item.sortType}</if>
+                    <if test="item.field == 'jobNum'">t.job_num ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">t.update_date ${item.sortType}</if>
+                    <if test="item.field == 'loginIp'">t.login_ip ${item.sortType}</if>
+                    <if test="item.field == 'email'">t.email ${item.sortType}</if>
+                    <if test="item.field == 'isLock'">t.is_lock ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+    </select>
+
+
+    <select id="findAllWithRoleId" resultMap="userResultMap">
+        SELECT
+        <include refid="column"/>, o.name as org_name
+        FROM ca_user t
+        inner join ca_user_role ur on t.id=ur.user_id
+        left join ca_organization o on t.org_id=o.id
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="getCountWithRoleId" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_user t inner join ca_user_role ur on t.id=ur.user_id
+        <include refid="sql_where"/>
+    </select>
+
+    <select id="findByPageWithRoleId" parameterType="java.util.Map" resultMap="userResultMap">
+        SELECT
+        <include refid="column"/>, o.name as org_name
+        FROM ca_user t
+          inner join ca_user_role ur on t.id=ur.user_id
+          left join ca_organization o on t.org_id=o.id
+        <include refid="sql_where"/>
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="">
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'username'">CONVERT(t.username USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'loginName'">t.login_name ${item.sortType}</if>
+                    <if test="item.field == 'lastLoginDate'">t.last_login_date ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                    <if test="item.field == 'phone'">t.phone ${item.sortType}</if>
+                    <if test="item.field == 'jobNum'">t.job_num ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">t.update_date ${item.sortType}</if>
+                    <if test="item.field == 'loginIp'">t.login_ip ${item.sortType}</if>
+                    <if test="item.field == 'email'">t.email ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+    </select>
+
+    <select id="getCountOrgManager" parameterType="java.util.Map" resultType="int">
+        select
+        count(1)
+        from ca_user t inner join ca_org_manager om on t.id=om.user_id
+        where om.org_id = #{orgId} and t.is_delete = 0 and om.is_delete =0
+    </select>
+
+    <select id="findPageOrgManager" parameterType="java.util.Map" resultMap="userResultMap">
+        SELECT
+        <include refid="column"/>, o.name as org_name,om.is_lock as org_manager_is_lock
+        FROM ca_user t
+        inner join ca_org_manager om on t.id=om.user_id
+        left join ca_organization o on t.org_id=o.id
+        where om.org_id = #{orgId} and t.is_delete = 0 and om.is_delete =0
+        <choose>
+            <when test="orderFields != null and orderFields.size() > 0">
+                order by
+                <foreach collection="orderFields" index="idx"
+                         item="item" open="" separator="," close="">
+                    <if test="item.field == 'id'">t.id ${item.sortType}</if>
+                    <if test="item.field == 'username'">CONVERT(t.username USING gbk) COLLATE gbk_chinese_ci ${item.sortType}</if>
+                    <if test="item.field == 'loginName'">t.login_name ${item.sortType}</if>
+                    <if test="item.field == 'lastLoginDate'">t.last_login_date ${item.sortType}</if>
+                    <if test="item.field == 'createDate'">t.create_date ${item.sortType}</if>
+                    <if test="item.field == 'phone'">t.phone ${item.sortType}</if>
+                    <if test="item.field == 'jobNum'">t.job_num ${item.sortType}</if>
+                    <if test="item.field == 'updateDate'">t.update_date ${item.sortType}</if>
+                    <if test="item.field == 'loginIp'">t.login_ip ${item.sortType}</if>
+                    <if test="item.field == 'email'">t.email ${item.sortType}</if>
+                </foreach>
+            </when>
+            <otherwise>
+                ORDER BY t.create_date desc
+            </otherwise>
+        </choose>
+        LIMIT #{startRowNum},#{pageSize}
+    </select>
+    <select id="findAllOrgManagerByOrgId" resultMap="userResultMap">
+        SELECT
+        <include refid="column"/>, o.name as org_name
+        FROM ca_user t
+        inner join ca_org_manager om on t.id=om.user_id
+        left join ca_organization o on t.org_id=o.id
+        where om.org_id = #{orgId} and t.is_delete = 0 and om.is_delete =0
+    </select>
+
+    <select id="checkByMap" parameterType="java.util.Map" resultMap="userResultMap">
+        select
+        <include refid="column"/>
+        from ca_user t
+        <include refid="sql_where_2"/>
+    </select>
+
+    <update id="batchDisable" parameterType="java.util.List">
+        update ca_user t set t.is_lock=1,t.lockdate=#{loceDate} where t.id in
+        <foreach item="id" index="index" collection="idList" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+    <update id="batchEnable" parameterType="java.util.List">
+        update ca_user t set t.is_lock=0,t.lockdate=#{loceDate} where t.id in
+        <foreach item="id" index="index" collection="idList" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+    <!--查询条件-->
+    <sql id="sql_where">
+        <where>
+            <if test="loginName != null and loginName != ''">
+                <![CDATA[
+                and t.login_name like CONCAT('%',#{loginName},'%' )
+                ]]>
+            </if>
+            <if test="username != null and username != ''">
+                <![CDATA[
+                and t.username like CONCAT(#{username},'%' )
+            ]]>
+            </if>
+            <if test="password != null and password != ''">
+                <![CDATA[
+                and t.password = #{password}
+            ]]>
+            </if>
+            <if test="jobNum != null and jobNum != ''">
+                <![CDATA[
+                and t.job_num = #{jobNum}
+                ]]>
+            </if>
+            <if test="isLock != null">
+                <![CDATA[
+                and t.is_lock = #{isLock}
+                ]]>
+            </if>
+            <if test="roleId != null and roleId != ''">
+            <![CDATA[
+                and ur.role_id = #{roleId}
+                ]]>
+        </if>
+            <if test="directManagerName != null and directManagerName != ''">
+                <![CDATA[
+                and t.direct_manager_name = #{directManagerName}
+                ]]>
+            </if>
+             <![CDATA[
+                and t.is_delete = 0
+             ]]>
+        </where>
+    </sql>
+    <!--验证查询条件 -->
+    <sql id="sql_where_1">
+        <where>
+            <if test="loginName != null and loginName != ''">
+                <![CDATA[
+                and t.login_name =#{loginName}
+                ]]>
+            </if>
+            <if test="password != null and password != ''">
+                <![CDATA[
+                and t.password = #{password}
+            ]]>
+            </if>
+            <if test="jobNum != null and jobNum != ''">
+                <![CDATA[
+                and t.job_num = #{jobNum}
+                ]]>
+            </if>
+            <if test="isLock != null">
+                <![CDATA[
+                and t.is_lock = #{isLock}
+                ]]>
+            </if>
+            <if test="roleId != null and roleId != ''">
+                <![CDATA[
+                and ur.role_id = #{roleId}
+                ]]>
+            </if>
+            <![CDATA[
+                and t.is_delete = 0
+             ]]>
+        </where>
+    </sql>
+    <!--编辑用户信息时的验证查询条件 -->
+    <sql id="sql_where_2">
+        <where>
+            <if test="loginName != null and loginName != ''">
+                <![CDATA[
+                and t.login_name =#{loginName}
+                ]]>
+            </if>
+            <![CDATA[
+                and t.id != #{id}
+             ]]>
+            <![CDATA[
+                and t.is_delete = 0
+             ]]>
+        </where>
+    </sql>
+</mapper>
